@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# dist  <-- Commented out so we can commit dist folder
 dist-ssr
 *.local
 
