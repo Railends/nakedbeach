@@ -11,6 +11,24 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
+// Public bot status endpoint (no auth required)
+router.get('/bot/status', (req, res) => {
+    try {
+        const isLoggedIn = bot.client && bot.client.steamID;
+        res.json({
+            online: isLoggedIn,
+            steamId: isLoggedIn ? bot.client.steamID.getSteamID64() : null,
+            status: isLoggedIn ? 'Bot is online and ready' : 'Bot is offline'
+        });
+    } catch (error) {
+        res.json({
+            online: false,
+            status: 'Bot status unknown',
+            error: error.message
+        });
+    }
+});
+
 // Save user's trade URL
 router.post('/trade-url', requireAuth, (req, res) => {
     try {
