@@ -40,9 +40,15 @@ passport.use(new SteamStrategy({
 ));
 
 app.use(session({
-    secret: 'rustycoin secret key',
-    resave: true,
-    saveUninitialized: true
+    secret: process.env.SESSION_SECRET || 'rustycoin secret key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Allow cross-domain in production
+    }
 }));
 
 app.use(passport.initialize());
