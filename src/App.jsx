@@ -51,13 +51,16 @@ function App() {
 
   // --- AUTHENTICATION & SESSION ---
   const checkSession = () => {
+    console.log('🔍 Checking session...');
     fetch('/api/user', {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
     })
       .then(res => res.json())
       .then(data => {
+        console.log('📊 Session data:', data);
         if (data.loggedIn) {
+          console.log('✅ User logged in:', data.user.displayName);
           setUser({
             name: data.user.displayName || data.user._json?.personaname || 'Player',
             avatar: data.user.photos?.[0]?.value || data.user._json?.avatar || '',
@@ -66,21 +69,21 @@ function App() {
             level: 1,
             steamId: data.user.id || data.user.steamid
           })
+        } else {
+          console.log('❌ User not logged in');
         }
       })
       .catch(err => console.error("Failed to fetch session:", err))
   }
 
   useEffect(() => {
+    // Check session on mount and every 2 seconds for 10 seconds (to catch Steam redirect)
     checkSession()
 
-    // Re-check session when window regains focus (after Steam redirect)
-    const handleFocus = () => {
-      checkSession()
-    }
+    const interval = setInterval(checkSession, 2000)
+    setTimeout(() => clearInterval(interval), 10000)
 
-    window.addEventListener('focus', handleFocus)
-    return () => window.removeEventListener('focus', handleFocus)
+    return () => clearInterval(interval)
   }, [])
 
   // Load mock history on mount
