@@ -202,4 +202,58 @@ router.get('/withdrawals/history', requireAuth, (req, res) => {
     }
 });
 
+// ===== PRICING ENDPOINTS =====
+const pricing = require('../services/pricing');
+
+// Get price for a single item
+router.get('/price/:marketHashName', async (req, res) => {
+    try {
+        const { marketHashName } = req.params;
+        const price = await pricing.getItemPrice(decodeURIComponent(marketHashName));
+
+        res.json({
+            item: marketHashName,
+            price,
+            currency: 'USD'
+        });
+    } catch (error) {
+        console.error('Error fetching price:', error);
+        res.status(500).json({ error: 'Failed to fetch price' });
+    }
+});
+
+// Get prices for multiple items
+router.post('/prices/bulk', async (req, res) => {
+    try {
+        const { items } = req.body;
+
+        if (!items || !Array.isArray(items)) {
+            return res.status(400).json({ error: 'Items array required' });
+        }
+
+        const prices = await pricing.getMultipleItemPrices(items);
+
+        res.json({
+            prices,
+            currency: 'USD',
+            cached: pricing.getCacheStats()
+        });
+    } catch (error) {
+        console.error('Error fetching bulk prices:', error);
+        res.status(500).json({ error: 'Failed to fetch prices' });
+    }
+});
+
+// Get cache statistics (admin only)
+router.get('/prices/cache/stats', (req, res) => {
+    const stats = pricing.getCacheStats();
+    res.json(stats);
+});
+
+// Clear price cache (admin only)
+router.post('/prices/cache/clear', (req, res) => {
+    pricing.clearCache();
+    res.json({ success: true, message: 'Price cache cleared' });
+});
+
 module.exports = router;
