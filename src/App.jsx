@@ -50,7 +50,7 @@ function App() {
   }
 
   // --- AUTHENTICATION & SESSION ---
-  useEffect(() => {
+  const checkSession = () => {
     fetch('/api/user', {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
@@ -59,16 +59,28 @@ function App() {
       .then(data => {
         if (data.loggedIn) {
           setUser({
-            name: data.user.name,
-            avatar: data.user.avatar,
-            fullAvatar: data.user.avatar,
+            name: data.user.displayName || data.user._json?.personaname || 'Player',
+            avatar: data.user.photos?.[0]?.value || data.user._json?.avatar || '',
+            fullAvatar: data.user.photos?.[2]?.value || data.user._json?.avatarfull || '',
             balance: 0,
             level: 1,
-            steamId: data.user.steamid
+            steamId: data.user.id || data.user.steamid
           })
         }
       })
       .catch(err => console.error("Failed to fetch session:", err))
+  }
+
+  useEffect(() => {
+    checkSession()
+
+    // Re-check session when window regains focus (after Steam redirect)
+    const handleFocus = () => {
+      checkSession()
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
   }, [])
 
   // Load mock history on mount
