@@ -1,7 +1,15 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 
-const db = new Database(path.join(__dirname, '../data/rustycoin.db'));
+// Ensure data directory exists
+const dataDir = path.join(__dirname, '../data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+  console.log('📁 Created data directory');
+}
+
+const db = new Database(path.join(dataDir, 'rustycoin.db'));
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');
@@ -82,124 +90,124 @@ console.log('✅ Database schema created successfully');
 
 // Helper functions
 const db_helpers = {
-    // Deposits
-    createDeposit: (userId, tradeOfferId, items, totalValue) => {
-        const stmt = db.prepare(`
+  // Deposits
+  createDeposit: (userId, tradeOfferId, items, totalValue) => {
+    const stmt = db.prepare(`
       INSERT INTO deposits (user_steam_id, trade_offer_id, items, total_value)
       VALUES (?, ?, ?, ?)
     `);
-        return stmt.run(userId, tradeOfferId, JSON.stringify(items), totalValue);
-    },
+    return stmt.run(userId, tradeOfferId, JSON.stringify(items), totalValue);
+  },
 
-    updateDepositStatus: (tradeOfferId, status, acceptedAt = null) => {
-        const stmt = db.prepare(`
+  updateDepositStatus: (tradeOfferId, status, acceptedAt = null) => {
+    const stmt = db.prepare(`
       UPDATE deposits 
       SET status = ?, accepted_at = ?
       WHERE trade_offer_id = ?
     `);
-        return stmt.run(status, acceptedAt, tradeOfferId);
-    },
+    return stmt.run(status, acceptedAt, tradeOfferId);
+  },
 
-    getDepositByOfferId: (tradeOfferId) => {
-        const stmt = db.prepare('SELECT * FROM deposits WHERE trade_offer_id = ?');
-        return stmt.get(tradeOfferId);
-    },
+  getDepositByOfferId: (tradeOfferId) => {
+    const stmt = db.prepare('SELECT * FROM deposits WHERE trade_offer_id = ?');
+    return stmt.get(tradeOfferId);
+  },
 
-    // Withdrawals
-    createWithdrawal: (userId, gameId, gameType, items, totalValue) => {
-        const stmt = db.prepare(`
+  // Withdrawals
+  createWithdrawal: (userId, gameId, gameType, items, totalValue) => {
+    const stmt = db.prepare(`
       INSERT INTO withdrawals (user_steam_id, game_id, game_type, items, total_value)
       VALUES (?, ?, ?, ?, ?)
     `);
-        return stmt.run(userId, gameId, gameType, JSON.stringify(items), totalValue);
-    },
+    return stmt.run(userId, gameId, gameType, JSON.stringify(items), totalValue);
+  },
 
-    updateWithdrawalOffer: (withdrawalId, tradeOfferId) => {
-        const stmt = db.prepare(`
+  updateWithdrawalOffer: (withdrawalId, tradeOfferId) => {
+    const stmt = db.prepare(`
       UPDATE withdrawals 
       SET trade_offer_id = ?, sent_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
-        return stmt.run(tradeOfferId, withdrawalId);
-    },
+    return stmt.run(tradeOfferId, withdrawalId);
+  },
 
-    updateWithdrawalStatus: (tradeOfferId, status) => {
-        const stmt = db.prepare(`
+  updateWithdrawalStatus: (tradeOfferId, status) => {
+    const stmt = db.prepare(`
       UPDATE withdrawals 
       SET status = ?, accepted_at = CURRENT_TIMESTAMP
       WHERE trade_offer_id = ?
     `);
-        return stmt.run(status, tradeOfferId);
-    },
+    return stmt.run(status, tradeOfferId);
+  },
 
-    // Bot Inventory
-    addToInventory: (item, depositId = null) => {
-        const stmt = db.prepare(`
+  // Bot Inventory
+  addToInventory: (item, depositId = null) => {
+    const stmt = db.prepare(`
       INSERT INTO bot_inventory (asset_id, class_id, instance_id, name, market_hash_name, icon_url, value, acquired_from_deposit_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
-        return stmt.run(
-            item.assetid,
-            item.classid,
-            item.instanceid,
-            item.name,
-            item.market_hash_name,
-            item.icon_url,
-            item.value || 0,
-            depositId
-        );
-    },
+    return stmt.run(
+      item.assetid,
+      item.classid,
+      item.instanceid,
+      item.name,
+      item.market_hash_name,
+      item.icon_url,
+      item.value || 0,
+      depositId
+    );
+  },
 
-    removeFromInventory: (assetId) => {
-        const stmt = db.prepare('DELETE FROM bot_inventory WHERE asset_id = ?');
-        return stmt.run(assetId);
-    },
+  removeFromInventory: (assetId) => {
+    const stmt = db.prepare('DELETE FROM bot_inventory WHERE asset_id = ?');
+    return stmt.run(assetId);
+  },
 
-    getAvailableInventory: () => {
-        const stmt = db.prepare('SELECT * FROM bot_inventory WHERE status = "available"');
-        return stmt.all();
-    },
+  getAvailableInventory: () => {
+    const stmt = db.prepare('SELECT * FROM bot_inventory WHERE status = "available"');
+    return stmt.all();
+  },
 
-    // Trade Offers
-    saveTradeOffer: (offerId, partnerId, type, itemsToGive, itemsToReceive, state) => {
-        const stmt = db.prepare(`
+  // Trade Offers
+  saveTradeOffer: (offerId, partnerId, type, itemsToGive, itemsToReceive, state) => {
+    const stmt = db.prepare(`
       INSERT INTO trade_offers (offer_id, partner_steam_id, type, items_to_give, items_to_receive, state)
       VALUES (?, ?, ?, ?, ?, ?)
     `);
-        return stmt.run(
-            offerId,
-            partnerId,
-            type,
-            JSON.stringify(itemsToGive),
-            JSON.stringify(itemsToReceive),
-            state
-        );
-    },
+    return stmt.run(
+      offerId,
+      partnerId,
+      type,
+      JSON.stringify(itemsToGive),
+      JSON.stringify(itemsToReceive),
+      state
+    );
+  },
 
-    updateTradeOfferState: (offerId, state) => {
-        const stmt = db.prepare(`
+  updateTradeOfferState: (offerId, state) => {
+    const stmt = db.prepare(`
       UPDATE trade_offers 
       SET state = ?, updated_at = CURRENT_TIMESTAMP
       WHERE offer_id = ?
     `);
-        return stmt.run(state, offerId);
-    },
+    return stmt.run(state, offerId);
+  },
 
-    // User Settings
-    saveTradeUrl: (steamId, tradeUrl) => {
-        const stmt = db.prepare(`
+  // User Settings
+  saveTradeUrl: (steamId, tradeUrl) => {
+    const stmt = db.prepare(`
       INSERT INTO user_settings (steam_id, trade_url)
       VALUES (?, ?)
       ON CONFLICT(steam_id) DO UPDATE SET trade_url = ?, updated_at = CURRENT_TIMESTAMP
     `);
-        return stmt.run(steamId, tradeUrl, tradeUrl);
-    },
+    return stmt.run(steamId, tradeUrl, tradeUrl);
+  },
 
-    getTradeUrl: (steamId) => {
-        const stmt = db.prepare('SELECT trade_url FROM user_settings WHERE steam_id = ?');
-        const result = stmt.get(steamId);
-        return result ? result.trade_url : null;
-    }
+  getTradeUrl: (steamId) => {
+    const stmt = db.prepare('SELECT trade_url FROM user_settings WHERE steam_id = ?');
+    const result = stmt.get(steamId);
+    return result ? result.trade_url : null;
+  }
 };
 
 module.exports = { db, ...db_helpers };
