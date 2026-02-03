@@ -29,6 +29,12 @@ passport.deserializeUser((obj, done) => {
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+// --- PASSPORT STEAM STRATEGY ---
+console.log('🔧 Steam Strategy Config:');
+console.log('  returnURL:', `${BACKEND_URL}/auth/steam/return`);
+console.log('  realm:', `${BACKEND_URL}/`);
+console.log('  API Key:', process.env.STEAM_API_KEY ? '✅ Set' : '❌ Missing');
+
 passport.use(new SteamStrategy({
     returnURL: `${BACKEND_URL}/auth/steam/return`,
     realm: `${BACKEND_URL}/`,
@@ -36,6 +42,8 @@ passport.use(new SteamStrategy({
 },
     (identifier, profile, done) => {
         // profile contains the Steam user data
+        console.log('✅ Steam authentication successful for:', profile.displayName);
+        console.log('   Steam ID:', profile.id);
         return done(null, profile);
     }
 ));
@@ -86,7 +94,11 @@ app.get('/auth/steam',
 app.get('/auth/steam/return',
     passport.authenticate('steam', { failureRedirect: '/' }),
     (req, res) => {
-        // Successful authentication, redirect home.
+        console.log('🎉 Steam callback received');
+        console.log('   User authenticated:', req.isAuthenticated());
+        console.log('   User data:', req.user ? req.user.displayName : 'None');
+        console.log('   Session ID:', req.sessionID);
+        console.log('   Redirecting to:', FRONTEND_URL);
         res.redirect(FRONTEND_URL);
     });
 
