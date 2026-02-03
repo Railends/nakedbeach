@@ -52,12 +52,14 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'rustycoin secret key',
     resave: false,
     saveUninitialized: true, // Must be true for Passport to work
+    name: 'rustycoin.sid', // Custom name to avoid conflicts
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+        secure: true, // Always true for HTTPS (Render uses HTTPS)
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        sameSite: 'lax', // Same domain, so 'lax' is fine
-        path: '/'
+        sameSite: 'none', // Required for HTTPS cross-site cookies
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
     }
 }));
 
