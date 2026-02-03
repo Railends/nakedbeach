@@ -152,11 +152,16 @@ app.get('/auth/logout', (req, res) => {
 });
 
 // Serve frontend static files (after API routes)
-app.use(express.static(path.join(__dirname, '../dist')));
+// When deployed on Render with backend as root, dist is in parent directory
+const distPath = path.join(__dirname, '../dist');
+console.log('📁 Serving static files from:', distPath);
+app.use(express.static(distPath));
 
 // Fallback to index.html for client-side routing (must be last)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
+    const indexPath = path.join(distPath, 'index.html');
+    console.log('📄 Serving index.html from:', indexPath);
+    res.sendFile(indexPath);
 });
 
 const PORT = process.env.PORT || 5000;
