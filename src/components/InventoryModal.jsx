@@ -26,7 +26,7 @@ export default function InventoryModal({ isOpen, onClose, onDeposit }) {
         ]
 
         try {
-            const res = await fetch('https://nakedbeach.onrender.com/api/inventory', { credentials: 'include' })
+            const res = await fetch('/api/inventory', { credentials: 'include' })
             const data = await res.json()
 
             let realItems = []

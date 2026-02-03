@@ -5,6 +5,7 @@ const session = require('express-session');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const axios = require('axios');
+const path = require('path');
 
 dotenv.config();
 
@@ -148,6 +149,14 @@ app.get('/auth/logout', (req, res) => {
     req.logout(() => {
         res.redirect(FRONTEND_URL);
     });
+});
+
+// Serve frontend static files (after API routes)
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// Fallback to index.html for client-side routing (must be last)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 const PORT = process.env.PORT || 5000;

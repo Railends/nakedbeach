@@ -15,7 +15,7 @@ export default function TradeStatusModal({ isOpen, onClose, offerId, type = 'dep
 
     const pollStatus = async () => {
         try {
-            const res = await fetch(`https://nakedbeach.onrender.com/api/${type}/status/${offerId}`, {
+            const res = await fetch(`/api/${type}/status/${offerId}`, {
                 credentials: 'include'
             })
             const data = await res.json()

@@ -51,7 +51,7 @@ function App() {
 
   // --- AUTHENTICATION & SESSION ---
   useEffect(() => {
-    fetch('https://nakedbeach.onrender.com/api/user', {
+    fetch('/api/user', {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
     })
@@ -153,12 +153,12 @@ function App() {
 
   const handleLogin = () => {
     // Redirect to backend auth
-    window.location.href = 'https://nakedbeach.onrender.com/auth/steam'
+    window.location.href = '/auth/steam'
   }
 
   const handleLogout = () => {
     // Clear session via backend
-    window.location.href = 'https://nakedbeach.onrender.com/auth/logout'
+    window.location.href = '/auth/logout'
   }
 
   const handleDepositItems = (items) => {

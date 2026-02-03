@@ -14,7 +14,7 @@ export default function TradeUrlModal({ isOpen, onClose, user }) {
 
     const fetchTradeUrl = async () => {
         try {
-            const res = await fetch('https://nakedbeach.onrender.com/api/trade-url', {
+            const res = await fetch('/api/trade-url', {
                 credentials: 'include'
             })
             const data = await res.json()
@@ -36,7 +36,7 @@ export default function TradeUrlModal({ isOpen, onClose, user }) {
         setError(null)
 
         try {
-            const res = await fetch('https://nakedbeach.onrender.com/api/trade-url', {
+            const res = await fetch('/api/trade-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
