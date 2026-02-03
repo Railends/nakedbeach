@@ -98,8 +98,8 @@ app.get('/auth/steam/return',
         console.log('   User authenticated:', req.isAuthenticated());
         console.log('   User data:', req.user ? req.user.displayName : 'None');
         console.log('   Session ID:', req.sessionID);
-        console.log('   Redirecting to:', FRONTEND_URL);
-        res.redirect(FRONTEND_URL);
+        console.log('   Redirecting to:', `${FRONTEND_URL}/?login=success`);
+        res.redirect(`${FRONTEND_URL}/?login=success`);
     });
 
 // Authenticated User Endpoint

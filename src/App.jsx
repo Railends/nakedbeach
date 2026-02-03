@@ -77,6 +77,16 @@ function App() {
   }
 
   useEffect(() => {
+    // Check if redirected from Steam login
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginSuccess = urlParams.has('login');
+
+    if (loginSuccess) {
+      console.log('🔄 Detected login redirect, checking session immediately...');
+      // Remove the parameter from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     // Check session on mount and every 2 seconds for 10 seconds (to catch Steam redirect)
     checkSession()
 
